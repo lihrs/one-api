@@ -141,7 +141,7 @@ func buildXunfeiAuthUrl(hostUrl string, apiKey, apiSecret string) string {
 	signString := []string{"host: " + ul.Host, "date: " + date, "GET " + ul.Path + " HTTP/1.1"}
 	sign := strings.Join(signString, "\n")
 	sha := HmacWithShaToBase64("hmac-sha256", sign, apiSecret)
-	authUrl := fmt.Sprintf("hmac username=\"%s\", algorithm=\"%s\", headers=\"%s\", signature=\"%s\"", apiKey,
+	authUrl := fmt.Sprintf("hmac api_key=\"%s\", algorithm=\"%s\", headers=\"%s\", signature=\"%s\"", apiKey,
 		"hmac-sha256", "host date request-line", sha)
 	authorization := base64.StdEncoding.EncodeToString([]byte(authUrl))
 	v := url.Values{}
