@@ -176,6 +176,9 @@ sudo service nginx restart
 
 ### 基于 Docker Compose 进行部署
 
+# 编译docker镜像
+docker build -t one-api .
+
 > 仅启动方式不同，参数设置不变，请参考基于 Docker 部署部分
 
 ```shell
