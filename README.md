@@ -478,12 +478,12 @@ https://openai.justsong.cn
 
 
 
-
+# 本地部署
 cd /home/one-api
 
 git pull
 
-# 编译docker镜像
+### 编译docker镜像
 docker build -t one-api .
-#运行
+### 运行
 docker run --name one-api -d --restart always -p 3000:3000 -e TZ=Asia/Shanghai -v /home/one-api/data:/data one-api:latest
