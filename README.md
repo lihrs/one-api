@@ -475,3 +475,15 @@ https://openai.justsong.cn
 同样适用于基于本项目的二开项目。
 
 依据 MIT 协议，使用者需自行承担使用本项目的风险与责任，本开源项目开发者与此无关。
+
+
+
+
+cd /home/one-api
+
+git pull
+
+# 编译docker镜像
+docker build -t one-api .
+#运行
+docker run --name one-api -d --restart always -p 3000:3000 -e TZ=Asia/Shanghai -v /home/one-api/data:/data one-api:latest
