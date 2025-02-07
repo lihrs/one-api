@@ -4,6 +4,9 @@ WORKDIR /web
 COPY ./VERSION .
 COPY ./web .
 
+# 配置国内镜像源
+RUN npm config set registry https://registry.npmmirror.com
+
 RUN npm install --prefix /web/default & \
     npm install --prefix /web/berry & \
     npm install --prefix /web/air & \
