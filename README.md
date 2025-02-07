@@ -185,6 +185,10 @@ sudo service nginx restart
 3. 安装完成后在应用商店中搜索 `One-API`，点击安装，配置域名等基本信息即可完成安装；
 
 ### 基于 Docker Compose 进行部署
+20250207添加
+
+docker build -t one-api .
+docker run --name one-api -d --restart always -p 11030:3000 -e TZ=Asia/Shanghai -v /home/one-api/data:/data one-api:latest --privileged=true
 
 > 仅启动方式不同，参数设置不变，请参考基于 Docker 部署部分
 
