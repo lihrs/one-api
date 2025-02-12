@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/songquanpeng/one-api/common/logger"
 )
@@ -14,6 +15,8 @@ const (
 	MILLI_USD = 1.0 / 1000 * USD
 	RMB       = USD / USD2RMB
 )
+
+var modelRatioLock sync.RWMutex
 
 // ModelRatio
 // https://platform.openai.com/docs/models/model-endpoint-compatibility
@@ -88,11 +91,11 @@ var ModelRatio = map[string]float64{
 	"claude-2.1":                 8.0 / 1000 * USD,
 	"claude-3-haiku-20240307":    0.25 / 1000 * USD,
 	"claude-3-5-haiku-20241022":  1.0 / 1000 * USD,
-	"claude-3-5-haiku-latest":    1.0 / 1000 * USD,	
+	"claude-3-5-haiku-latest":    1.0 / 1000 * USD,
 	"claude-3-sonnet-20240229":   3.0 / 1000 * USD,
 	"claude-3-5-sonnet-20240620": 3.0 / 1000 * USD,
 	"claude-3-5-sonnet-20241022": 3.0 / 1000 * USD,
-	"claude-3-5-sonnet-latest"  : 3.0 / 1000 * USD,	
+	"claude-3-5-sonnet-latest":   3.0 / 1000 * USD,
 	"claude-3-opus-20240229":     15.0 / 1000 * USD,
 	// https://cloud.baidu.com/doc/WENXINWORKSHOP/s/hlrk4akp7
 	"ERNIE-4.0-8K":       0.120 * RMB,
@@ -112,15 +115,24 @@ var ModelRatio = map[string]float64{
 	"bge-large-en":       0.002 * RMB,
 	"tao-8k":             0.002 * RMB,
 	// https://ai.google.dev/pricing
-	"gemini-pro":                          1, // $0.00025 / 1k characters -> $0.001 / 1k tokens
-	"gemini-1.0-pro":                      1,
-	"gemini-1.5-pro":                      1,
-	"gemini-1.5-pro-001":                  1,
-	"gemini-1.5-flash":                    1,
-	"gemini-1.5-flash-001":                1,
-	"gemini-2.0-flash-exp":                1,
-	"gemini-2.0-flash-thinking-exp":       1,
-	"gemini-2.0-flash-thinking-exp-01-21": 1,
+	// https://cloud.google.com/vertex-ai/generative-ai/pricing
+	// "gemma-2-2b-it":                       0,
+	// "gemma-2-9b-it":                       0,
+	// "gemma-2-27b-it":                      0,
+	"gemini-pro":                          0.25 * MILLI_USD, // $0.00025 / 1k characters -> $0.001 / 1k tokens
+	"gemini-1.0-pro":                      0.125 * MILLI_USD,
+	"gemini-1.5-pro":                      1.25 * MILLI_USD,
+	"gemini-1.5-pro-001":                  1.25 * MILLI_USD,
+	"gemini-1.5-pro-experimental":         1.25 * MILLI_USD,
+	"gemini-1.5-flash":                    0.075 * MILLI_USD,
+	"gemini-1.5-flash-001":                0.075 * MILLI_USD,
+	"gemini-1.5-flash-8b":                 0.0375 * MILLI_USD,
+	"gemini-2.0-flash-exp":                0.075 * MILLI_USD,
+	"gemini-2.0-flash":                    0.15 * MILLI_USD,
+	"gemini-2.0-flash-001":                0.15 * MILLI_USD,
+	"gemini-2.0-flash-lite-preview-02-05": 0.075 * MILLI_USD,
+	"gemini-2.0-flash-thinking-exp-01-21": 0.075 * MILLI_USD,
+	"gemini-2.0-pro-exp-02-05":            1.25 * MILLI_USD,
 	"aqa":                                 1,
 	// https://open.bigmodel.cn/pricing
 	"glm-zero-preview": 0.01 * RMB,
@@ -417,11 +429,15 @@ func ModelRatio2JSONString() string {
 }
 
 func UpdateModelRatioByJSONString(jsonStr string) error {
+	modelRatioLock.Lock()
+	defer modelRatioLock.Unlock()
 	ModelRatio = make(map[string]float64)
 	return json.Unmarshal([]byte(jsonStr), &ModelRatio)
 }
 
 func GetModelRatio(name string, channelType int) float64 {
+	modelRatioLock.RLock()
+	defer modelRatioLock.RUnlock()
 	if strings.HasPrefix(name, "qwen-") && strings.HasSuffix(name, "-internet") {
 		name = strings.TrimSuffix(name, "-internet")
 	}
